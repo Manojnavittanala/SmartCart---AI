@@ -40,6 +40,24 @@ def register(user: UserRegister):
 @router.post("/login")
 def login(user: UserLogin):
 
-    return {
-        "message": "Login API - Coming Soon"
-    }
+    for existing_user in users:
+
+        if existing_user["email"] == user.email:
+
+            from app.core.security import verify_password
+
+            if verify_password(user.password, existing_user["password"]):
+
+                return {
+                    "message": "Login successful"
+                }
+
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid password"
+            )
+
+    raise HTTPException(
+        status_code=404,
+        detail="User not found"
+    )
