@@ -1,3 +1,4 @@
+from app.api import recommendation
 from app.api import product
 from fastapi import FastAPI
 
@@ -15,6 +16,7 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(auth.router)
 app.include_router(product.router)
+app.include_router(recommendation.router)
 
 
 @app.get("/")
