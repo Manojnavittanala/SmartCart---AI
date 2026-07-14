@@ -31,12 +31,16 @@ def get_products(db: Session = Depends(get_db)):
 @router.post("/")
 def add_product(product: ProductCreate, db: Session = Depends(get_db)):
     new_product = Product(
-        name=product.name,
-        category=product.category,
-        price=product.price,
-        image=product.image
-    )
-
+    name=product.name,
+    brand=product.brand,
+    category=product.category,
+    description=product.description,
+    price=product.price,
+    rating=product.rating,
+    stock=product.stock,
+    image=product.image
+)
+    
     db.add(new_product)
     db.commit()
     db.refresh(new_product)
