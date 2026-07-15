@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database.database import SessionLocal
-from app.models.product import Product
 from app.schemas.recommendation import RecommendationRequest
+from app.services.recommendation_service import recommend_product
 
 router = APIRouter(
     prefix="/recommend",
@@ -25,22 +25,16 @@ def recommend(
     db: Session = Depends(get_db)
 ):
 
-    products = (
-        db.query(Product)
-        .filter(
-            Product.category.ilike(request.category),
-            Product.price <= request.budget
-        )
-        .order_by(Product.rating.desc())
-        .all()
+    best = recommend_product(
+        db=db,
+        budget=request.budget,
+        category=request.category
     )
 
-    if not products:
+    if best is None:
         return {
-            "message": "No products found within your budget."
+            "message": "No products found."
         }
-
-    best = products[0]
 
     return {
         "best_product": {
@@ -49,9 +43,5 @@ def recommend(
             "price": best.price,
             "rating": best.rating
         },
-        "reason": (
-            f"{best.name} is recommended because it has a rating of "
-            f"{best.rating}, fits your budget, and belongs to the "
-            f"{best.category} category."
-        )
+        "reason": f"{best.name} is recommended because it has a rating of {best.rating} and fits your budget."
     }

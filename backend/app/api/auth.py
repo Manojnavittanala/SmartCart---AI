@@ -1,11 +1,18 @@
 from fastapi import APIRouter, HTTPException
 from app.schemas.user import UserRegister, UserLogin
-from app.core.security import hash_password
+from app.core.security import (
+    hash_password,
+    verify_password,
+    create_access_token
+)
+from app.schemas.token import Token
 
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"]
 )
+
+from app.schemas.token import Token
 
 # Temporary in-memory database
 users = []
@@ -37,19 +44,27 @@ def register(user: UserRegister):
     }
 
 
-@router.post("/login")
+@router.post("/login", response_model=Token)
 def login(user: UserLogin):
 
     for existing_user in users:
 
         if existing_user["email"] == user.email:
 
-            from app.core.security import verify_password
+            if verify_password(
+                user.password,
+                existing_user["password"]
+            ):
 
-            if verify_password(user.password, existing_user["password"]):
+                access_token = create_access_token(
+                    data={
+                        "sub": existing_user["email"]
+                    }
+                )
 
                 return {
-                    "message": "Login successful"
+                    "access_token": access_token,
+                    "token_type": "bearer"
                 }
 
             raise HTTPException(
