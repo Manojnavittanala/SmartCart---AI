@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.schemas.user import UserRegister, UserLogin
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import Depends
 from app.core.security import (
     hash_password,
     verify_password,
@@ -45,21 +47,19 @@ def register(user: UserRegister):
 
 
 @router.post("/login", response_model=Token)
-def login(user: UserLogin):
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
     for existing_user in users:
 
-        if existing_user["email"] == user.email:
+        if existing_user["email"] == form_data.username:
 
             if verify_password(
-                user.password,
+                form_data.password,
                 existing_user["password"]
             ):
 
                 access_token = create_access_token(
-                    data={
-                        "sub": existing_user["email"]
-                    }
+                    data={"sub": existing_user["email"]}
                 )
 
                 return {

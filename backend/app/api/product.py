@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.database.database import SessionLocal
 from app.models.product import Product
 from app.schemas.product import ProductCreate
+from app.core.dependencies import get_current_user
 
 router = APIRouter(
     prefix="/products",
@@ -27,20 +28,24 @@ def get_products(db: Session = Depends(get_db)):
     return products
 
 
-# Add product
 @router.post("/")
-def add_product(product: ProductCreate, db: Session = Depends(get_db)):
+def add_product(
+    product: ProductCreate,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+
     new_product = Product(
-    name=product.name,
-    brand=product.brand,
-    category=product.category,
-    description=product.description,
-    price=product.price,
-    rating=product.rating,
-    stock=product.stock,
-    image=product.image
-)
-    
+        name=product.name,
+        brand=product.brand,
+        category=product.category,
+        description=product.description,
+        price=product.price,
+        rating=product.rating,
+        stock=product.stock,
+        image=product.image
+    )
+
     db.add(new_product)
     db.commit()
     db.refresh(new_product)
@@ -49,7 +54,6 @@ def add_product(product: ProductCreate, db: Session = Depends(get_db)):
         "message": "Product Added Successfully",
         "product": new_product
     }
-
 
 # Search Products
 @router.get("/search")
