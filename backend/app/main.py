@@ -2,6 +2,7 @@ from app.api import recommendation
 from app.api import product
 from fastapi import FastAPI
 
+from app.services.gemini_service import ask_gemini
 from app.api import auth
 from app.database.database import Base, engine
 from app.models.user import User
@@ -32,3 +33,8 @@ def health():
         "status": "Running",
         "project": "SmartCart AI"
     }
+
+@app.get("/test-gemini")
+def test_gemini():
+    response = ask_gemini("Say hello in one sentence.")
+    return {"response": response}
