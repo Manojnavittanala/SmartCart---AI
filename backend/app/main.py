@@ -1,6 +1,7 @@
 from app.api import recommendation
 from app.api import product
 from fastapi import FastAPI
+from app.routers.ai import router as ai_router
 
 from app.services.gemini_service import ask_gemini
 from app.api import auth
@@ -18,6 +19,7 @@ Base.metadata.create_all(bind=engine)
 app.include_router(auth.router)
 app.include_router(product.router)
 app.include_router(recommendation.router)
+app.include_router(ai_router)
 
 
 @app.get("/")
